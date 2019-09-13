@@ -1,44 +1,26 @@
 package com.android.example.myapplication;
 
-import android.accounts.Account;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.Scope;
+import com.android.example.myapplication.GoogleCalenderViewModel.GoogleCalenderRepository;
+import com.android.example.myapplication.GoogleCalenderViewModel.GoogleCalenderViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.android.example.myapplication.dummy.DummyContent;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * An activity representing a list of Items. This activity
@@ -50,13 +32,13 @@ import java.util.List;
  */
 public class ItemListActivity extends AppCompatActivity {
 
-    private static final int RC_AUTHORIZE_CALENDER = 2;
-    private static final int RC_REAUTHORIZE = 0;
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
     private boolean mTwoPane;
+    private GoogleCalenderViewModel calenderViewModel;
+    private EventsAdapter eventsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,172 +66,46 @@ public class ItemListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
+
+        calenderViewModel = ViewModelProviders.of(this).get(GoogleCalenderViewModel.class);
+        eventsAdapter = new EventsAdapter();
+        calenderViewModel.getAllEvents().observe(this, events -> eventsAdapter.submitList(events));
+        eventsAdapter.setOnItemClickListener(event -> {
+            //calenderViewModel.updateEvent(event.setStatus("cancelled"));
+            if (mTwoPane) {
+                Bundle arguments = new Bundle();
+                arguments.putString(ItemDetailFragment.ARG_ITEM_ID, event.getId());
+                ItemDetailFragment fragment = new ItemDetailFragment();
+                fragment.setArguments(arguments);
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.item_detail_container, fragment)
+                        .commit();
+            } else {
+                Intent intent = new Intent(ItemListActivity.this, ItemDetailActivity.class);
+                intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, event.getId());
+
+                startActivity(intent);
+            }
+        });
+
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
-
-        Scope SCOPE_CALENDER =
-                new Scope("https://www.googleapis.com/auth/calendar.events");
-        Scope SCOPE_EMAIL = new Scope(Scopes.EMAIL);
-
-        if (!GoogleSignIn.hasPermissions(
-                GoogleSignIn.getLastSignedInAccount(this),
-                SCOPE_CALENDER,
-                SCOPE_EMAIL)) {
-            GoogleSignIn.requestPermissions(
-                    this,
-                    RC_AUTHORIZE_CALENDER,
-                    GoogleSignIn.getLastSignedInAccount(this),
-                    SCOPE_CALENDER,
-                    SCOPE_EMAIL);
-        } else {
-            getEvents();
-        }
-    }
-
-    private void getEvents() {
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account != null) {
-            GetEventsTask task = new GetEventsTask(account.getAccount());
-            task.execute();
-        }
-    }
-
-    /** Global instance of the HTTP transport. */
-    private static HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
-    /** Global instance of the JSON factory. */
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-
-    private class GetEventsTask extends AsyncTask<Void, Void, List<Event>> {
-
-        Account mAccount;
-        GetEventsTask(Account account) {
-            mAccount = account;
-        }
-
-        @Override
-        protected List<Event> doInBackground(Void... params) {
-            List<Event> result = null;
-            try {
-                GoogleAccountCredential credential =
-                        GoogleAccountCredential.usingOAuth2(
-                                ItemListActivity.this,
-                                Collections.singleton(
-                                        "https://www.googleapis.com/auth/calendar.events")
-                        );
-                credential.setSelectedAccount(mAccount);
-                Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-                        .setApplicationName("CalenderTask")
-                        .build();
-                Events connectionsResponse = service.events()
-                        .list("primary")
-                        .execute();
-                result = connectionsResponse.getItems();
-            } catch (UserRecoverableAuthIOException userRecoverableException) {
-                // Explain to the user again why you need these OAuth permissions
-                // And prompt the resolution to the user again:
-                startActivityForResult(userRecoverableException.getIntent(),RC_REAUTHORIZE);
-            } catch (IOException e) {
-                // Other non-recoverable exceptions.
-            }
-
-            return result;
-        }
-
-        @Override
-        protected void onCancelled() {
-        }
-
-        @Override
-        protected void onPostExecute(List<Event> events) {
-            Log.i("events", events.size() + "");
-            if(events.size() > 0)
-                Log.i("events", events.get(0).getStatus() + "");
-        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_AUTHORIZE_CALENDER
-                || requestCode == RC_REAUTHORIZE) {
+        if (requestCode == GoogleCalenderRepository.RC_AUTHORIZE_CALENDER
+                || requestCode == GoogleCalenderRepository.RC_REAUTHORIZE) {
             if (resultCode == RESULT_OK) {
-                getEvents();
+                calenderViewModel.getAllEvents().removeObservers(this);
+                calenderViewModel.getAllEvents().observe(this, events -> eventsAdapter.submitList(events));
             }
         }
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane));
+        recyclerView.setAdapter(eventsAdapter);
     }
-
-    public static class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
-
-        private final ItemListActivity mParentActivity;
-        private final List<DummyContent.DummyItem> mValues;
-        private final boolean mTwoPane;
-        private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
-                if (mTwoPane) {
-                    Bundle arguments = new Bundle();
-                    arguments.putString(ItemDetailFragment.ARG_ITEM_ID, item.id);
-                    ItemDetailFragment fragment = new ItemDetailFragment();
-                    fragment.setArguments(arguments);
-                    mParentActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.item_detail_container, fragment)
-                            .commit();
-                } else {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, ItemDetailActivity.class);
-                    intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, item.id);
-
-                    context.startActivity(intent);
-                }
-            }
-        };
-
-        SimpleItemRecyclerViewAdapter(ItemListActivity parent,
-                                      List<DummyContent.DummyItem> items,
-                                      boolean twoPane) {
-            mValues = items;
-            mParentActivity = parent;
-            mTwoPane = twoPane;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_list_content, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
-
-            holder.itemView.setTag(mValues.get(position));
-            holder.itemView.setOnClickListener(mOnClickListener);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mValues.size();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            final TextView mIdView;
-            final TextView mContentView;
-
-            ViewHolder(View view) {
-                super(view);
-                mIdView = (TextView) view.findViewById(R.id.id_text);
-                mContentView = (TextView) view.findViewById(R.id.content);
-            }
-        }
-    }
-
 }
