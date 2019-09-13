@@ -43,6 +43,11 @@ public class SharedPrefManager {
         editor.putBoolean(FIRST_TIME, status);
         editor.apply();
     }
+    public Boolean getFirstTime() {
+        final SharedPreferences sharedPreferences = mContext.getSharedPreferences(
+                SHARED_PREF_NAME, 0);
+        return sharedPreferences.getBoolean(FIRST_TIME, false);
+    }
 
     public User getUserData(){
         SharedPreferences prefs = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);

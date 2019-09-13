@@ -1,4 +1,4 @@
-package com.android.example.myapplication.Login;
+package com.android.example.myapplication.UI.Login;
 
 import android.content.Intent;
 import android.util.Log;
@@ -13,9 +13,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 
-import java.text.MessageFormat;
-
-public class LoginPresenter implements LoginViewPresenter {
+public class LoginPresenter implements LoginViewPresenter{
     private LoginActivity context;
     private GoogleSignInClient mGoogleSignInClient;
     private static final String TAG = "Login Activity";
@@ -45,12 +43,9 @@ public class LoginPresenter implements LoginViewPresenter {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             if (account != null) {
-                Log.i("googleEmail", MessageFormat.format("DisplayName : {0}\nFamilyName : {1}\nGivenName : {2}\nEmail: {3}" +
-                                "\nId: {4}\nIdToken: {5}\nPhotoUri: {6}\n",
-                        account.getDisplayName(), account.getFamilyName(), account.getGivenName(), account.getEmail(), account.getId(), account.getIdToken(), account.getPhotoUrl()));
                 User tempUser = new User(account.getId(), account.getEmail(), account.getDisplayName(), account.getPhotoUrl());
-                SharedPrefManager.getInstance(context).setLoginStatus(true);
                 SharedPrefManager.getInstance(context).setUserData(tempUser);
+                SharedPrefManager.getInstance(context).setLoginStatus(true);
                 context.startActivity(new Intent(context, ItemListActivity.class));
             }
         } catch (ApiException e) {
