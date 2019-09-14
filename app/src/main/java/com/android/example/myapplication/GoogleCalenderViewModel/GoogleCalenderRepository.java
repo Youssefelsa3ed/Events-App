@@ -28,6 +28,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -42,12 +43,13 @@ public class GoogleCalenderRepository {
 
     private Context context;
     private GoogleSignInAccount account;
-    private static MutableLiveData<List<Event>> allEvents;
+    private MutableLiveData<List<Event>> allEvents;
+    private List<Event> eventList;
 
     GoogleCalenderRepository(Context context) {
         this.context = context;
-        if(allEvents == null)
-            allEvents = new MutableLiveData<>();
+        allEvents = new MutableLiveData<>();
+        eventList = new ArrayList<>();
         account = GoogleSignIn.getLastSignedInAccount(context);
 
         Scope SCOPE_CALENDER = new Scope("https://www.googleapis.com/auth/calendar.events");
@@ -76,10 +78,19 @@ public class GoogleCalenderRepository {
                 Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                         .setApplicationName("CalenderTask")
                         .build();
-                Events connectionsResponse = service.events()
-                        .list("primary")
-                        .execute();
-                result = connectionsResponse.getItems();
+
+                String pageToken = null;
+                do {
+                    Events connectionsResponse = service.events()
+                            .list("primary")
+                            .setOrderBy("startTime")
+                            .setSingleEvents(true)
+                            .setPageToken(pageToken)
+                            .execute();
+                    result = connectionsResponse.getItems();
+                    pageToken = connectionsResponse.getNextPageToken();
+                }
+                while (pageToken != null);
             } catch (UserRecoverableAuthIOException userRecoverableException) {
                 Toast.makeText(context, "Can't get your events unless you give the application an access to your Google account!", Toast.LENGTH_SHORT).show();
                 ((Activity)context).startActivityForResult(userRecoverableException.getIntent(),RC_REAUTHORIZE);
@@ -99,7 +110,8 @@ public class GoogleCalenderRepository {
             Log.i("events", events.size() + "");
             if(events.size() > 0)
                 Log.i("events", events.get(0).getStatus() + "");
-            allEvents.postValue(events);
+            eventList = events;
+            allEvents.postValue(eventList);
         }
     }
 

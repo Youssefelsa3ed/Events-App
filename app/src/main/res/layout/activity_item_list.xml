@@ -38,5 +38,85 @@
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
+    <RelativeLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:behavior_hideable="true"
+        android:background="@drawable/shape_item"
+        app:behavior_peekHeight="0dp"
+        android:id="@+id/eventLayout"
+        app:layout_behavior="@string/bottom_sheet_behavior">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:visibility="visible"
+                android:layout_margin="5dp"
+                android:id="@+id/btnClose"
+                android:elevation="5dp"
+                android:src="@drawable/ic_close"/>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:scaleType="centerCrop"
+                android:id="@+id/image" />
+
+            <LinearLayout
+                android:id="@+id/line"
+                android:padding="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_below="@id/image"
+                >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/name"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="viewStart"
+                    />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:textSize="12sp"
+                android:textAlignment="viewStart"
+                android:lines="2"
+                android:layout_below="@id/line"
+                android:id="@+id/details" />
+            <TextView
+                android:padding="5dp"
+                android:layout_below="@+id/details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/location"
+                android:textColor="@color/colorAccent"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginStart="5dp"
+                android:drawableStart="@drawable/ic_location"
+                android:drawableTint="@color/colorAccent"/>
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,25 +1,29 @@
 package com.android.example.myapplication;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.example.myapplication.GoogleCalenderViewModel.GoogleCalenderRepository;
 import com.android.example.myapplication.GoogleCalenderViewModel.GoogleCalenderViewModel;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import android.view.View;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 /**
@@ -32,6 +36,13 @@ import android.view.View;
  */
 public class ItemListActivity extends AppCompatActivity {
 
+    RelativeLayout eventLayout;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+
+    public BottomSheetBehavior bottomSheetBehavior;
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -44,19 +55,10 @@ public class ItemListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
+        ButterKnife.bind(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
@@ -64,14 +66,21 @@ public class ItemListActivity extends AppCompatActivity {
             // If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
+        } else {
+            mTwoPane = false;
+            eventLayout = findViewById(R.id.eventLayout);
+            bottomSheetBehavior = BottomSheetBehavior.from(eventLayout);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
 
 
         calenderViewModel = ViewModelProviders.of(this).get(GoogleCalenderViewModel.class);
         eventsAdapter = new EventsAdapter();
         calenderViewModel.getAllEvents().observe(this, events -> eventsAdapter.submitList(events));
-        eventsAdapter.setOnItemClickListener(event -> {
-            //calenderViewModel.updateEvent(event.setStatus("cancelled"));
+        AtomicInteger count = new AtomicInteger(0);
+        eventsAdapter.setOnItemClickListener((event, position) -> {
+            calenderViewModel.updateEvent(event.setStatus("confirmed").setDescription("desc231" + count.getAndIncrement()));
+            eventsAdapter.notifyItemChanged(position);
             if (mTwoPane) {
                 Bundle arguments = new Bundle();
                 arguments.putString(ItemDetailFragment.ARG_ITEM_ID, event.getId());
@@ -81,10 +90,12 @@ public class ItemListActivity extends AppCompatActivity {
                         .replace(R.id.item_detail_container, fragment)
                         .commit();
             } else {
-                Intent intent = new Intent(ItemListActivity.this, ItemDetailActivity.class);
+                /*Intent intent = new Intent(ItemListActivity.this, ItemDetailActivity.class);
                 intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, event.getId());
 
                 startActivity(intent);
+*/
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
 
@@ -107,5 +118,11 @@ public class ItemListActivity extends AppCompatActivity {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setAdapter(eventsAdapter);
+    }
+
+    @OnClick(R.id.fab)
+    public void onViewClicked() {
+        Snackbar.make(fab, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 }

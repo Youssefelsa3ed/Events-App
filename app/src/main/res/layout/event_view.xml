@@ -3,12 +3,25 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="150dp"
     android:layout_margin="10dp">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtLocation"
-        android:drawablePadding="5dp"
-        android:textColor="@color/colorPrimary"
-        android:drawableStart="@drawable/ic_location"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtLocation"
+            android:drawablePadding="5dp"
+            android:layout_alignParentStart="true"
+            android:textColor="@android:color/black"
+            android:drawableStart="@drawable/ic_location"/>
 
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/txtDescription"
+            android:layout_marginEnd="10dp"
+            android:textColor="@android:color/black"/>
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>

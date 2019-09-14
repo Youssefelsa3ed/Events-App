@@ -31,9 +31,8 @@ public class EventsAdapter extends ListAdapter<Event, EventsAdapter.ViewHolder> 
         @Override
         public boolean areContentsTheSame(Event oldItem, Event newItem) {
             return oldItem.getId().equals(newItem.getId()) &&
-                    oldItem.getStart().getDate().equals(newItem.getStart().getDate()) &&
-                    oldItem.getEnd().getDate().equals(newItem.getEnd().getDate()) &&
-                    oldItem.getStatus().equals(newItem.getStatus());
+                    oldItem.getStatus().equals(newItem.getStatus()) &&
+                    oldItem.getDescription().equals(newItem.getDescription());
         }
     };
 
@@ -46,26 +45,29 @@ public class EventsAdapter extends ListAdapter<Event, EventsAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.txtLocation.setText(getItem(holder.getAdapterPosition()).getLocation());
+        holder.txtDescription.setText(getItem(holder.getAdapterPosition()).getDescription());
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.txtLocation)
         TextView txtLocation;
+        @BindView(R.id.txtDescription)
+        TextView txtDescription;
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (listener != null && position != RecyclerView.NO_POSITION) {
-                    listener.onItemClick(getItem(position));
+                    listener.onItemClick(getItem(position), position);
                 }
             });
         }
     }
 
     public interface OnItemClickListener {
-        void onItemClick(Event event);
+        void onItemClick(Event event, int position);
     }
 
     void setOnItemClickListener(OnItemClickListener listener) {
