@@ -6,29 +6,33 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import com.google.api.services.calendar.model.Event;
+import com.android.example.myapplication.LocalDatabase.EventsDB;
 
 import java.util.List;
 
 public class GoogleCalenderViewModel extends AndroidViewModel {
 
     private GoogleCalenderRepository repository;
-    private LiveData<List<Event>> allNotes;
+    private LiveData<List<EventsDB>> allNotes;
     public GoogleCalenderViewModel(@NonNull Application application) {
         super(application);
         repository = new GoogleCalenderRepository(application);
         allNotes = repository.getAllEvents();
     }
 
-    public void updateEvent(Event event){
+    public void insertEvents(List<EventsDB> eventsDBS){
+        repository.insertEvents(eventsDBS);
+    }
+
+    public void updateEvent(EventsDB event){
         repository.updateEvent(event);
     }
 
-    public LiveData<List<Event>> getAllEvents() {
+    public LiveData<List<EventsDB>> getAllEvents() {
         return allNotes;
     }
 
-    public Event getEvent(String id){
+    public EventsDB getEvent(String id){
         return repository.getEvent(id);
     }
 }

@@ -10,7 +10,7 @@
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
     android:showDividers="middle"
-    tools:context=".ItemListActivity">
+    tools:context=".UI.EventsList.EventListActivity">
 
     <!--
     This layout is a two-pane layout for the Items
@@ -19,14 +19,14 @@
     -->
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/item_list"
+        android:id="@+id/rvEvents"
         android:name="com.android.example.myapplication.ItemListFragment"
         android:layout_width="@dimen/item_width"
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="com.android.example.myapplication.ItemListActivity"
+        tools:context="com.android.example.myapplication.UI.EventsList.EventListActivity"
         tools:listitem="@layout/item_list_content" />
 
     <FrameLayout

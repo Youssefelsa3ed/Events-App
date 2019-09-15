@@ -1,16 +1,11 @@
 package com.android.example.myapplication.UI.Splash;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 
-import com.android.example.myapplication.ItemListActivity;
+import com.android.example.myapplication.UI.EventsList.EventListActivity;
 import com.android.example.myapplication.UI.Login.LoginActivity;
 import com.android.example.myapplication.Utilities.SharedPrefManager;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class SplashPresenter implements SplashViewPresenter {
 
@@ -31,7 +26,7 @@ public class SplashPresenter implements SplashViewPresenter {
             public void onFinish() {
                 Intent intent;
                 if (SharedPrefManager.getInstance(context).getLoginStatus())
-                    intent = new Intent(context, ItemListActivity.class);
+                    intent = new Intent(context, EventListActivity.class);
                 else
                     intent = new Intent(context, LoginActivity.class);
 

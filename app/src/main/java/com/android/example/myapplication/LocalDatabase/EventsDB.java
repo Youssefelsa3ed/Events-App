@@ -16,6 +16,8 @@ public class EventsDB {
     private String temperature;
     private String humidity;
     private String weatherIcon;
+    private String description;
+    private String status;
 
     @NonNull
     public String getId() {
@@ -82,7 +84,23 @@ public class EventsDB {
         this.weatherIcon = weatherIcon;
     }
 
-    public EventsDB(@NonNull String id, String location, String creatorEmail, String eventStartDate, String eventEndDate, String temperature, String humidity, String weatherIcon) {
+    public String getDescription() {
+        return description == null ? "" : description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public EventsDB(@NonNull String id, String location, String creatorEmail, String eventStartDate, String eventEndDate, String temperature, String humidity, String weatherIcon, String description, String status) {
         this.id = id;
         this.location = location;
         this.creatorEmail = creatorEmail;
@@ -91,5 +109,7 @@ public class EventsDB {
         this.temperature = temperature;
         this.humidity = humidity;
         this.weatherIcon = weatherIcon;
+        this.description = description;
+        this.status = status;
     }
 }

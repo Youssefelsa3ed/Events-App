@@ -1,9 +1,11 @@
-package com.android.example.myapplication;
+package com.android.example.myapplication.UI.EventsList;
 
 import android.app.Activity;
 import android.os.Bundle;
 
 import com.android.example.myapplication.GoogleCalenderViewModel.GoogleCalenderViewModel;
+import com.android.example.myapplication.LocalDatabase.EventsDB;
+import com.android.example.myapplication.R;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 import androidx.fragment.app.Fragment;
@@ -14,17 +16,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.api.services.calendar.model.Event;
 
 import java.util.Objects;
 
 /**
  * A fragment representing a single Item detail screen.
- * This fragment is either contained in a {@link ItemListActivity}
- * in two-pane mode (on tablets) or a {@link ItemDetailActivity}
+ * This fragment is either contained in a {@link EventListActivity}
+ * in two-pane mode (on tablets) or a {@link EventListActivity}
  * on handsets.
  */
-public class ItemDetailFragment extends Fragment {
+public class EventDetailFragment extends Fragment {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -34,13 +35,13 @@ public class ItemDetailFragment extends Fragment {
     /**
      * The dummy content this fragment is presenting.
      */
-    private Event mItem;
+    private EventsDB mItem;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ItemDetailFragment() {
+    public EventDetailFragment() {
     }
 
     @Override

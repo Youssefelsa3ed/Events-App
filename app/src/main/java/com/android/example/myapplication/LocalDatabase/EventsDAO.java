@@ -10,16 +10,19 @@ import java.util.List;
 
 @Dao
 public interface EventsDAO {
-    //select data from database
+    //select data from table
     @Query("SELECT * FROM EventsDB")
     LiveData<List<EventsDB>> getEvents();
-    // delete data from database
+    //clear all data from table
     @Query("DELETE FROM EventsDB")
     void deleteTable();
-    //update data in database
+    //update data in table
     @Update()
     void updateEvent(EventsDB eventsDB);
-
+    //insert data into table
     @Insert
     void insertEvents(List<EventsDB> eventsList);
+    //delete data from table
+    @Query("DELETE FROM EventsDB WHERE id = :id")
+    void deleteEvent(String id);
 }

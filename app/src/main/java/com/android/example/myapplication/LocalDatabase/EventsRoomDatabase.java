@@ -3,15 +3,17 @@ package com.android.example.myapplication.LocalDatabase;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+@Database(entities = {EventsDB.class},version = 1)
 public abstract class EventsRoomDatabase extends RoomDatabase {
 
     public abstract EventsDAO eventsDAO();
     private static EventsRoomDatabase INSTANCE;
-    static EventsRoomDatabase getDatabase(final Context context){
+    public static EventsRoomDatabase getDatabase(final Context context){
         if(INSTANCE==null){
             synchronized (EventsDB.class){
                 if(INSTANCE==null){
