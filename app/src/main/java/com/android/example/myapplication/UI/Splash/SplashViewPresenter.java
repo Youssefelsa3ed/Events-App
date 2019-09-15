@@ -1,5 +1,7 @@
 package com.android.example.myapplication.UI.Splash;
 
 public interface SplashViewPresenter {
-    void loading();
+    void getWeatherData();
+    void checkPermissions();
+    void proceedToNextActivity();
 }

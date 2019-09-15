@@ -1,17 +1,30 @@
 package com.android.example.myapplication.UI.EventsList;
 
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import androidx.core.view.GravityCompat;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.android.example.myapplication.GoogleCalenderViewModel.GoogleCalenderViewModel;
 import com.android.example.myapplication.LocalDatabase.EventsDB;
+import com.android.example.myapplication.Models.LocalWeatherModel.LocalWeatherData;
 import com.android.example.myapplication.R;
 import com.android.example.myapplication.UI.Adapters.EventsAdapter;
+import com.android.example.myapplication.UI.Splash.SplashActivity;
+import com.android.example.myapplication.Utilities.CommonMethods;
+import com.android.example.myapplication.Utilities.SharedPrefManager;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -23,15 +36,17 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
-
-import static android.content.Context.CONNECTIVITY_SERVICE;
 
 public class EventsListPresenter implements EventsListViewPresenter {
     static final int RC_AUTHORIZE_CALENDER = 2;
@@ -60,16 +75,20 @@ public class EventsListPresenter implements EventsListViewPresenter {
     }
 
     @Override
-    public boolean isConnected() {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnected();
-    }
-
-    @Override
     public void setLayout() {
         context.setSupportActionBar(context.toolbar);
-        context.toolbar.setTitle(context.getTitle());
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View toolbarLayout = inflater.inflate(R.layout.main_header, context.toolbar);
+        ImageView menu = toolbarLayout.findViewById(R.id.imgOpenNavDrawer);
+        TextView txtTitle = toolbarLayout.findViewById(R.id.txtTitle);
+        menu.setOnClickListener(v -> {
+            if (context.drawerLayout.isDrawerOpen(GravityCompat.START))
+                context.drawerLayout.closeDrawers(); //CLOSE Nav Drawer!
+            else
+                context.drawerLayout.openDrawer(GravityCompat.START, true); //OPEN Nav Drawer!
+        });
+        txtTitle.setText(context.getTitle());
+
         if (context.findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
@@ -82,6 +101,15 @@ public class EventsListPresenter implements EventsListViewPresenter {
             context.bottomSheetBehavior = BottomSheetBehavior.from(context.eventLayout);
             context.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
+        context.navView.setNavigationItemSelectedListener(context);
+        View header = context.navView.getHeaderView(0);
+        SimpleDraweeView userImage = header.findViewById(R.id.imageView);
+        TextView userName = header.findViewById(R.id.txtUserName);
+        TextView userEmail = header.findViewById(R.id.txtUserEmail);
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(context);
+        userImage.setImageURI(Objects.requireNonNull(account).getPhotoUrl());
+        userName.setText(Objects.requireNonNull(account).getDisplayName());
+        userEmail.setText(Objects.requireNonNull(account).getEmail());
     }
 
     @Override
@@ -97,26 +125,56 @@ public class EventsListPresenter implements EventsListViewPresenter {
             calenderViewModel.getAllEvents().observe(context, events -> eventsAdapter.submitList(events));
         }
         eventsAdapter.setOnChipClickListener((event, position, action) -> {
-            if (isConnected()) {
+            if (CommonMethods.isConnected(context)) {
                 event.setStatus(action);
                 calenderViewModel.updateEvent(event);
-                if (!action.equals("cancelled"))
-                    eventsAdapter.notifyItemChanged(position);
+                if (!action.equals("declined"))
+                    eventsAdapter.notifyDataSetChanged();
 
             }
         });
+
         eventsAdapter.setOnItemClickListener(event -> {
             if (mTwoPane) {
-                    Bundle arguments = new Bundle();
-                    arguments.putString(EventDetailFragment.ARG_ITEM_ID, event.getId());
-                    EventDetailFragment fragment = new EventDetailFragment();
-                    fragment.setArguments(arguments);
-                    context.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.item_detail_container, fragment)
-                            .commit();
+                Bundle arguments = new Bundle();
+                arguments.putString(EventDetailFragment.ARG_ITEM_ID, event.getId());
+                EventDetailFragment fragment = new EventDetailFragment();
+                fragment.setArguments(arguments);
+                context.getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.item_detail_container, fragment)
+                        .commit();
+            } else {
+                SimpleDateFormat format1 = new SimpleDateFormat("EEEE, MMM d", Locale.US);
+                SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                context.txtCreator.setText(event.getCreatorEmail());
+                try {
+                    if(event.getEventEndDate().equals(event.getEventStartDate())) {
+                        context.txtEventDate.setText(String.format("%s • %s - %s",
+                                format1.format(format2.parse(event.getEventStartDate())),
+                                event.getEventStartTime().substring(0, 5), event.getEventEndTime().substring(0, 5)));
+                    }
+                    else
+                        context.txtEventDate.setText(String.format("%s • %s \n%s • %s",
+                                format1.format(format2.parse(event.getEventStartDate())), event.getEventStartTime().substring(0, 5),
+                                format1.format(format2.parse(event.getEventEndDate())), event.getEventEndTime().substring(0, 5)));
                 }
-                else
-                    context.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                catch (ParseException e) {
+                    if(event.getEventEndDate().equals(event.getEventStartDate())) {
+                        context.txtEventDate.setText(String.format("%s • %s - %s",
+                                (event.getEventStartDate()),
+                                event.getEventStartTime().substring(0, 5), event.getEventEndTime().substring(0, 5)));
+                    }
+                    else
+                        context.txtEventDate.setText(String.format("%s • %s \n%s • %s",
+                                event.getEventStartDate(), event.getEventStartTime().substring(0, 5),
+                                event.getEventEndDate(), event.getEventEndTime().substring(0, 5)));
+                }
+                context.txtLocation.setText(event.getLocation());
+                context.txtStatus.setText(event.getStatus().replace("accepted","Accepted")
+                        .replace("tentative", "Pending").replace("needsAction", "Pending"));
+                context.txtSummary.setText(event.getSummary());
+                context.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
         });
     }
 
@@ -124,6 +182,18 @@ public class EventsListPresenter implements EventsListViewPresenter {
     public void reAssignLiveDataObserver() {
         calenderViewModel = ViewModelProviders.of(context).get(GoogleCalenderViewModel.class);
         calenderViewModel.getAllEvents().observe(context, events -> eventsAdapter.submitList(events));
+    }
+
+    @Override
+    public void logout() {
+        SharedPrefManager.getInstance(context).Logout();
+        SharedPrefManager.getInstance(context).clearSavedWeatherData();
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(context, gso);
+        mGoogleSignInClient.revokeAccess();
+        mGoogleSignInClient.signOut();
+        context.startActivity(new Intent(context, SplashActivity.class));
+        context.finishAffinity();
     }
 
     public static class GetEventsTask extends AsyncTask<Void, Void, List<Event>> {
@@ -172,7 +242,25 @@ public class EventsListPresenter implements EventsListViewPresenter {
                 return;
             List<EventsDB> eventsDBList = new ArrayList<>();
             for (Event e : events) {
-                eventsDBList.add(new EventsDB(e.getId(), e.getLocation(), e.getCreator().getEmail(), e.getStart().getDateTime().toString(), e.getEnd().getDateTime().toString(), "", "", "", e.getDescription(), e.getStatus()));
+                String status = "";
+                if (e.getAttendees() != null)
+                    for (EventAttendee attendee : e.getAttendees()) {
+                        if (attendee.getEmail().equals(Objects.requireNonNull(GoogleSignIn.getLastSignedInAccount(context)).getEmail())) {
+                            status = attendee.getResponseStatus();
+                            break;
+                        }
+                    }
+                if (status.equals("declined"))
+                    continue;
+                String startDate = e.getStart().getDate() == null ? e.getStart().getDateTime().toString().split("T")[0] : e.getStart().getDate().toString();
+                String endDate = e.getEnd().getDate() == null ? e.getEnd().getDateTime().toString().split("T")[0] : e.getEnd().getDate().toString();
+                String startTime = e.getStart().getDateTime() == null ? "" : e.getStart().getDateTime().toString().split("T")[1];
+                String endTime = e.getEnd().getDateTime() == null ? "" : e.getEnd().getDateTime().toString().split("T")[1];
+                LocalWeatherData weatherData = SharedPrefManager.getInstance(context).getWeatherData(startDate);
+                if (weatherData != null)
+                    eventsDBList.add(new EventsDB(e.getId(), e.getLocation(), e.getCreator().getEmail(), startDate, endDate, weatherData.getTempMax(), weatherData.getTempMin(), weatherData.getWindSpeed(), weatherData.getHumidity(), weatherData.getWeatherIcon(), e.getDescription(), status, e.getSummary(), startTime, endTime));
+                else
+                    eventsDBList.add(new EventsDB(e.getId(), e.getLocation(), e.getCreator().getEmail(), startDate, endDate, 0, 0, 0, 0, "", e.getDescription(), status, e.getSummary(), startTime, endTime));
             }
             calenderViewModel.insertEvents(eventsDBList);
         }
@@ -198,9 +286,16 @@ public class EventsListPresenter implements EventsListViewPresenter {
                 // Retrieve the event from the API
                 Event event = service.events().get("primary", mEvent.getId()).execute();
                 // Make a change
-                Event updatedEvent = event.setStatus(mEvent.getStatus());
+                if (event.getAttendees() != null) {
+                    for (EventAttendee attendee : event.getAttendees()) {
+                        if (attendee.getEmail().equals(Objects.requireNonNull(GoogleSignIn.getLastSignedInAccount(context)).getEmail())) {
+                            attendee.setResponseStatus(mEvent.getStatus());
+                            break;
+                        }
+                    }
+                }
                 // Update the event
-                result = service.events().update("primary", mEvent.getId(), updatedEvent).execute();
+                result = service.events().update("primary", mEvent.getId(), event).execute();
             } catch (UserRecoverableAuthIOException userRecoverableException) {
                 // Explain to the user again why you need these OAuth permissions
                 // And prompt the resolution to the user again:

@@ -13,11 +13,16 @@ public class EventsDB {
     private String creatorEmail;
     private String eventStartDate;
     private String eventEndDate;
-    private String temperature;
-    private String humidity;
+    private String eventStartTime;
+    private String eventEndTime;
+    private double temperatureMax;
+    private double temperatureMin;
+    private double windSpeed;
+    private int humidity;
     private String weatherIcon;
     private String description;
     private String status;
+    private String summary;
 
     @NonNull
     public String getId() {
@@ -60,19 +65,35 @@ public class EventsDB {
         this.eventEndDate = eventEndDate;
     }
 
-    public String getTemperature() {
-        return temperature;
+    public double getTemperatureMax() {
+        return temperatureMax;
     }
 
-    public void setTemperature(String temperature) {
-        this.temperature = temperature;
+    public void setTemperatureMax(double temperatureMax) {
+        this.temperatureMax = temperatureMax;
     }
 
-    public String getHumidity() {
+    public double getTemperatureMin() {
+        return temperatureMin;
+    }
+
+    public void setTemperatureMin(double temperatureMin) {
+        this.temperatureMin = temperatureMin;
+    }
+
+    public double getWindSpeed() {
+        return windSpeed;
+    }
+
+    public void setWindSpeed(double windSpeed) {
+        this.windSpeed = windSpeed;
+    }
+
+    public int getHumidity() {
         return humidity;
     }
 
-    public void setHumidity(String humidity) {
+    public void setHumidity(int humidity) {
         this.humidity = humidity;
     }
 
@@ -100,16 +121,45 @@ public class EventsDB {
         this.status = status;
     }
 
-    public EventsDB(@NonNull String id, String location, String creatorEmail, String eventStartDate, String eventEndDate, String temperature, String humidity, String weatherIcon, String description, String status) {
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getEventStartTime() {
+        return eventStartTime;
+    }
+
+    public void setEventStartTime(String eventStartTime) {
+        this.eventStartTime = eventStartTime;
+    }
+
+    public String getEventEndTime() {
+        return eventEndTime;
+    }
+
+    public void setEventEndTime(String eventEndTime) {
+        this.eventEndTime = eventEndTime;
+    }
+
+    public EventsDB(@NonNull String id, String location, String creatorEmail, String eventStartDate, String eventEndDate, double temperatureMax, double temperatureMin, double windSpeed, int humidity, String weatherIcon, String description, String status, String summary, String eventStartTime, String eventEndTime) {
         this.id = id;
         this.location = location;
         this.creatorEmail = creatorEmail;
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
-        this.temperature = temperature;
+        this.temperatureMax = temperatureMax;
+        this.temperatureMin = temperatureMin;
+        this.windSpeed = windSpeed;
         this.humidity = humidity;
         this.weatherIcon = weatherIcon;
         this.description = description;
         this.status = status;
+        this.summary = summary;
+        this.eventStartTime = eventStartTime;
+        this.eventEndTime = eventEndTime;
     }
 }

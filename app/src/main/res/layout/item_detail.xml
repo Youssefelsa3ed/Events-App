@@ -1,10 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/item_detail"
-    style="?android:attr/textAppearanceLarge"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:textIsSelectable="true"
-    tools:context=".UI.EventsList.EventDetailFragment" />
+    android:background="@color/colorWhite"
+    android:padding="@dimen/activity_vertical_margin"
+    android:elevation="5dp"
+    android:id="@+id/eventLayout"
+    tools:context=".UI.EventsList.EventDetailFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        style="?android:attr/textAppearanceLarge"
+        android:textAlignment="viewStart"
+        android:drawablePadding="10dp"
+        android:id="@+id/txtEventDate"
+        android:drawableStart="@drawable/ic_date"/>
+
+    <TextView
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtLocation"
+        android:layout_below="@id/txtEventDate"
+        style="?android:attr/textAppearanceLarge"
+        android:textAlignment="viewStart"
+        android:drawablePadding="10dp"
+        android:layout_marginTop="10dp"
+        android:drawableStart="@drawable/ic_location"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtCreator"
+        android:layout_below="@id/txtLocation"
+        style="?android:attr/textAppearanceLarge"
+        android:textAlignment="viewStart"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:drawablePadding="10dp"
+        android:drawableStart="@drawable/ic_creator"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtSummary"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_below="@id/txtCreator"
+        android:textAlignment="viewStart"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:drawablePadding="10dp"
+        android:drawableStart="@drawable/ic_summary"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtStatus"
+        android:layout_below="@id/txtSummary"
+        android:textSize="14sp"
+        android:textAlignment="viewStart"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"/>
+
+</RelativeLayout>

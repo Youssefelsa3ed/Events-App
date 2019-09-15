@@ -30,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+        login.setSize(SignInButton.SIZE_WIDE);
         presenter = new LoginPresenter(this);
     }
 

@@ -1,8 +1,6 @@
 package com.android.example.myapplication.GoogleCalenderViewModel;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
@@ -11,13 +9,12 @@ import com.android.example.myapplication.LocalDatabase.EventsDAO;
 import com.android.example.myapplication.LocalDatabase.EventsDB;
 import com.android.example.myapplication.LocalDatabase.EventsRoomDatabase;
 import com.android.example.myapplication.UI.EventsList.EventsListPresenter;
+import com.android.example.myapplication.Utilities.CommonMethods;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import java.util.List;
 import java.util.Objects;
-
-import static android.content.Context.CONNECTIVITY_SERVICE;
 
 class GoogleCalenderRepository {
 
@@ -98,7 +95,7 @@ class GoogleCalenderRepository {
     }
 
     LiveData<List<EventsDB>> getAllEvents() {
-        if (isConnected())
+        if (CommonMethods.isConnected(context))
             getEvents();
         return allEvents;
     }
@@ -106,7 +103,7 @@ class GoogleCalenderRepository {
     void updateEvent(EventsDB event) {
         if (account != null)
             new EventsListPresenter.UpdateAnEvent(event).execute();
-        if(event.getStatus().equals("cancelled"))
+        if(event.getStatus().equals("declined"))
             new DeleteEventLocal(eventsDAO, event.getId()).execute();
         else
             new UpdateEventLocal(eventsDAO, event).execute();
@@ -118,12 +115,6 @@ class GoogleCalenderRepository {
                 return event;
         }
         return null;
-    }
-
-    private boolean isConnected() {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnected();
     }
 
 }

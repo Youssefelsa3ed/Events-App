@@ -3,13 +3,14 @@ package com.android.example.myapplication.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.android.example.myapplication.Models.UserModel.User;
+import com.android.example.myapplication.Models.LocalWeatherModel.LocalWeatherData;
 import com.google.gson.Gson;
 
 public class SharedPrefManager {
-    final static String SHARED_PREF_NAME = "calender_task";
-    final static String LOGIN_STATUS = "login_status";
-    final static String USER_DATA = "user_data";
+    private final static String SHARED_PREF_NAME = "calender_task";
+    private final static String SHARED_WEATHER_DATA = "weather_data";
+    private final static String LOGIN_STATUS = "login_status";
+    private final static String FIRST_DATE = "first_data";
     final static String FIRST_TIME = "shared_first_time";
     private static Context mContext;
     private static SharedPrefManager mInstance ;
@@ -36,32 +37,37 @@ public class SharedPrefManager {
         editor.apply();
     }
 
-    public void setFirstTime(Boolean status) {
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(SHARED_PREF_NAME,
-                0);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(FIRST_TIME, status);
-        editor.apply();
-    }
-    public Boolean getFirstTime() {
-        final SharedPreferences sharedPreferences = mContext.getSharedPreferences(
-                SHARED_PREF_NAME, 0);
-        return sharedPreferences.getBoolean(FIRST_TIME, false);
-    }
+    public LocalWeatherData getWeatherData(String date){
+        SharedPreferences prefs = mContext.getSharedPreferences(SHARED_WEATHER_DATA, Context.MODE_PRIVATE);
+        String json = prefs.getString(date, "");
+        if(json == null || json.equals(""))
+            return null;
 
-    public User getUserData(){
-        SharedPreferences prefs = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Gson gson = new Gson();
-        String json = prefs.getString(USER_DATA, "");
-        return gson.fromJson(json, User.class) ;
+        return gson.fromJson(json, LocalWeatherData.class) ;
     }
 
-    public void setUserData(User data){
-        SharedPreferences.Editor editor = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
+    public void saveWeatherData(LocalWeatherData data, String date){
+        SharedPreferences.Editor editor = mContext.getSharedPreferences(SHARED_WEATHER_DATA, Context.MODE_PRIVATE).edit();
         Gson gson = new Gson();
         String json = gson.toJson(data);
-        editor.putString(USER_DATA, json);
+        editor.putString(date, json);
         editor.apply();
+    }
+
+    public String getFirstWeatherData(){
+        SharedPreferences prefs = mContext.getSharedPreferences(SHARED_WEATHER_DATA, Context.MODE_PRIVATE);
+        return prefs.getString(FIRST_DATE, "");
+    }
+
+    public void setFirstWeatherDate(String date){
+        SharedPreferences.Editor editor = mContext.getSharedPreferences(SHARED_WEATHER_DATA, Context.MODE_PRIVATE).edit();
+        editor.putString(FIRST_DATE, date);
+        editor.apply();
+    }
+
+    public void clearSavedWeatherData(){
+        mContext.getSharedPreferences(SHARED_WEATHER_DATA, Context.MODE_PRIVATE).edit().clear().apply();
     }
 
     /**

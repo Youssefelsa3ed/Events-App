@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.android.example.myapplication.UI.EventsList.EventListActivity;
-import com.android.example.myapplication.Models.UserModel.User;
 import com.android.example.myapplication.Utilities.SharedPrefManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -43,10 +42,9 @@ public class LoginPresenter implements LoginViewPresenter{
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             if (account != null) {
-                User tempUser = new User(account.getId(), account.getEmail(), account.getDisplayName(), account.getPhotoUrl());
-                SharedPrefManager.getInstance(context).setUserData(tempUser);
                 SharedPrefManager.getInstance(context).setLoginStatus(true);
                 context.startActivity(new Intent(context, EventListActivity.class));
+                context.finish();
             }
         } catch (ApiException e) {
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());

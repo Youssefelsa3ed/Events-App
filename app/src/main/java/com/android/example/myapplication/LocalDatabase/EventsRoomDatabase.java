@@ -8,7 +8,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {EventsDB.class},version = 1)
+@Database(entities = {EventsDB.class},version = 1, exportSchema = false)
 public abstract class EventsRoomDatabase extends RoomDatabase {
 
     public abstract EventsDAO eventsDAO();

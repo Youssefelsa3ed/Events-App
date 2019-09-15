@@ -3,8 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="150dp"
-    android:layout_margin="10dp">
+    android:layout_height="160dp"
+    android:layout_margin="10dp"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="3dp">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -13,26 +15,89 @@
             android:layout_height="wrap_content"
             android:id="@+id/txtLocation"
             android:drawablePadding="5dp"
+            android:layout_margin="10dp"
+            android:layout_toStartOf="@id/weatherLayout"
             android:layout_alignParentStart="true"
             android:textColor="@android:color/black"
             android:drawableStart="@drawable/ic_location"/>
 
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/txtLocation"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="10dp"
+            android:textColor="@android:color/black"
+            android:id="@+id/txtEventDate"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtEventDate"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="10dp"
+            android:textColor="@android:color/black"
+            android:id="@+id/txtStatus"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_alignParentEnd="true"
-            android:id="@+id/txtDescription"
-            android:layout_marginEnd="10dp"
-            android:textColor="@android:color/black"/>
+            android:layout_margin="10dp"
+            android:id="@+id/weatherLayout">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="@android:color/black"
+                    android:id="@+id/txtTemperature"
+                    android:drawablePadding="5dp"/>
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/ivWeatherIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    app:actualImageScaleType="centerCrop"/>
+            </LinearLayout>
+
+
+
+            <TextView
+                android:id="@+id/txtHumidity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="12sp"
+                android:textColor="@android:color/black"
+                android:layout_gravity="end"
+                android:drawableEnd="@drawable/ic_humidity"
+                android:drawablePadding="5dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtWindSpeed"
+                android:drawablePadding="5dp"
+                android:layout_gravity="end"
+                android:textSize="12sp"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="10dp"
+                android:drawableEnd="@drawable/ic_wind_speed"/>
+
+        </LinearLayout>
 
         <com.google.android.material.chip.ChipGroup
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:layout_marginBottom="10dp"
             android:id="@+id/chipGroup">
             <com.google.android.material.chip.Chip
@@ -42,9 +107,7 @@
                 android:id="@+id/acceptChip"
                 app:chipIcon="@drawable/ic_accept"
                 android:text="@string/accept"
-                android:textSize="12sp"
-                android:paddingEnd="5dp"
-                android:paddingStart="5dp"/>
+                android:textSize="12sp"/>
             <com.google.android.material.chip.Chip
                 style="@style/Widget.MaterialComponents.Chip.Action"
                 android:layout_width="wrap_content"
@@ -52,9 +115,7 @@
                 android:id="@+id/refuseChip"
                 app:chipIcon="@drawable/ic_refuse"
                 android:text="@string/refuse"
-                android:textSize="12sp"
-                android:paddingEnd="5dp"
-                android:paddingStart="5dp"/>
+                android:textSize="12sp"/>
 
         </com.google.android.material.chip.ChipGroup>
     </RelativeLayout>
