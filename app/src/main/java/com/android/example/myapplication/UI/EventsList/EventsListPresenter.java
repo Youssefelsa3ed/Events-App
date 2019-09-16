@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -16,13 +17,13 @@ import com.android.example.myapplication.GoogleCalenderViewModel.GoogleCalenderV
 import com.android.example.myapplication.LocalDatabase.EventsDB;
 import com.android.example.myapplication.Models.LocalWeatherModel.LocalWeatherData;
 import com.android.example.myapplication.R;
+import com.android.example.myapplication.Services.EventsRefreshService;
 import com.android.example.myapplication.UI.Adapters.EventsAdapter;
 import com.android.example.myapplication.UI.Splash.SplashActivity;
 import com.android.example.myapplication.Utilities.CommonMethods;
 import com.android.example.myapplication.Utilities.SharedPrefManager;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.Scopes;
@@ -66,12 +67,14 @@ public class EventsListPresenter implements EventsListViewPresenter {
      */
     private boolean mTwoPane;
     private static GoogleCalenderViewModel calenderViewModel;
-    private EventsAdapter eventsAdapter;
+    private static EventsAdapter eventsAdapter;
 
     EventsListPresenter(EventListActivity context) {
         EventsListPresenter.context = context;
         setLayout();
         setRecycler();
+        Intent service = new Intent(context, EventsRefreshService.class);
+        ContextCompat.startForegroundService(context, service);
     }
 
     @Override
@@ -106,10 +109,9 @@ public class EventsListPresenter implements EventsListViewPresenter {
         SimpleDraweeView userImage = header.findViewById(R.id.imageView);
         TextView userName = header.findViewById(R.id.txtUserName);
         TextView userEmail = header.findViewById(R.id.txtUserEmail);
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(context);
-        userImage.setImageURI(Objects.requireNonNull(account).getPhotoUrl());
-        userName.setText(Objects.requireNonNull(account).getDisplayName());
-        userEmail.setText(Objects.requireNonNull(account).getEmail());
+        userImage.setImageURI(SharedPrefManager.getInstance(context).getUserData().getPhotoUrl());
+        userName.setText(SharedPrefManager.getInstance(context).getUserData().getDisplayName());
+        userEmail.setText(SharedPrefManager.getInstance(context).getUserData().getEmail());
     }
 
     @Override
@@ -118,7 +120,8 @@ public class EventsListPresenter implements EventsListViewPresenter {
         context.rvEvents.setAdapter(eventsAdapter);
         Scope SCOPE_CALENDER = new Scope("https://www.googleapis.com/auth/calendar.events");
         Scope SCOPE_EMAIL = new Scope(Scopes.EMAIL);
-        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(context), SCOPE_CALENDER, SCOPE_EMAIL))
+        Scope SCOPE_PROFILE = new Scope(Scopes.PROFILE);
+        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(context), SCOPE_CALENDER, SCOPE_EMAIL, SCOPE_PROFILE))
             GoogleSignIn.requestPermissions(context, RC_AUTHORIZE_CALENDER, GoogleSignIn.getLastSignedInAccount(context), SCOPE_CALENDER, SCOPE_EMAIL);
         else {
             calenderViewModel = ViewModelProviders.of(context).get(GoogleCalenderViewModel.class);
@@ -128,8 +131,7 @@ public class EventsListPresenter implements EventsListViewPresenter {
             if (CommonMethods.isConnected(context)) {
                 event.setStatus(action);
                 calenderViewModel.updateEvent(event);
-                if (!action.equals("declined"))
-                    eventsAdapter.notifyDataSetChanged();
+                eventsAdapter.notifyDataSetChanged();
 
             }
         });
@@ -146,7 +148,7 @@ public class EventsListPresenter implements EventsListViewPresenter {
             } else {
                 SimpleDateFormat format1 = new SimpleDateFormat("EEEE, MMM d", Locale.US);
                 SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-                context.txtCreator.setText(event.getCreatorEmail());
+                context.txtCreator.setText(event.getOrganizerEmail());
                 try {
                     if(event.getEventEndDate().equals(event.getEventStartDate())) {
                         context.txtEventDate.setText(String.format("%s • %s - %s",
@@ -225,7 +227,7 @@ public class EventsListPresenter implements EventsListViewPresenter {
                 // Explain to the user again why you need these OAuth permissions
                 // And prompt the resolution to the user again:
                 context.startActivityForResult(userRecoverableException.getIntent(), RC_REAUTHORIZE);
-            } catch (IOException ignored) {
+            } catch (NullPointerException | IOException e) {
                 // Other non-recoverable exceptions.
             }
 
@@ -250,19 +252,18 @@ public class EventsListPresenter implements EventsListViewPresenter {
                             break;
                         }
                     }
-                if (status.equals("declined"))
-                    continue;
                 String startDate = e.getStart().getDate() == null ? e.getStart().getDateTime().toString().split("T")[0] : e.getStart().getDate().toString();
                 String endDate = e.getEnd().getDate() == null ? e.getEnd().getDateTime().toString().split("T")[0] : e.getEnd().getDate().toString();
                 String startTime = e.getStart().getDateTime() == null ? "" : e.getStart().getDateTime().toString().split("T")[1];
                 String endTime = e.getEnd().getDateTime() == null ? "" : e.getEnd().getDateTime().toString().split("T")[1];
                 LocalWeatherData weatherData = SharedPrefManager.getInstance(context).getWeatherData(startDate);
                 if (weatherData != null)
-                    eventsDBList.add(new EventsDB(e.getId(), e.getLocation(), e.getCreator().getEmail(), startDate, endDate, weatherData.getTempMax(), weatherData.getTempMin(), weatherData.getWindSpeed(), weatherData.getHumidity(), weatherData.getWeatherIcon(), e.getDescription(), status, e.getSummary(), startTime, endTime));
+                    eventsDBList.add(new EventsDB(e.getId(), e.getLocation(), e.getOrganizer().getEmail(), startDate, endDate, weatherData.getTempMax(), weatherData.getTempMin(), weatherData.getWindSpeed(), weatherData.getHumidity(), weatherData.getWeatherIcon(), e.getDescription(), status, e.getSummary() == null ? "No title" : e.getSummary(), startTime, endTime));
                 else
-                    eventsDBList.add(new EventsDB(e.getId(), e.getLocation(), e.getCreator().getEmail(), startDate, endDate, 0, 0, 0, 0, "", e.getDescription(), status, e.getSummary(), startTime, endTime));
+                    eventsDBList.add(new EventsDB(e.getId(), e.getLocation(), e.getOrganizer().getEmail(), startDate, endDate, 0, 0, 0, 0, "", e.getDescription(), status, e.getSummary() == null ? "No title" : e.getSummary(), startTime, endTime));
             }
             calenderViewModel.insertEvents(eventsDBList);
+            eventsAdapter.notifyDataSetChanged();
         }
     }
 

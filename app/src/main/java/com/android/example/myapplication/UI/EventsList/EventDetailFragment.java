@@ -89,7 +89,7 @@ public class EventDetailFragment extends Fragment {
         SimpleDateFormat format1 = new SimpleDateFormat("EEEE, MMM d", Locale.US);
         SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
-        txtCreator.setText(mItem.getCreatorEmail());
+        txtCreator.setText(mItem.getOrganizerEmail());
         try {
             if(mItem.getEventEndDate().equals(mItem.getEventStartDate())) {
                 txtEventDate.setText(String.format("%s • %s - %s",

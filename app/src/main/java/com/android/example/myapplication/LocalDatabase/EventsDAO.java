@@ -22,7 +22,4 @@ public interface EventsDAO {
     //insert data into table
     @Insert
     void insertEvents(List<EventsDB> eventsList);
-    //delete data from table
-    @Query("DELETE FROM EventsDB WHERE id = :id")
-    void deleteEvent(String id);
 }

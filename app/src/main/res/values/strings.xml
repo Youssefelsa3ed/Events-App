@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">My Calendar</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="title_activity_login">Sign in</string>
     <string name="prompt_email">Email</string>
@@ -18,4 +18,5 @@
     <string name="weath_api_key">03e5ddae1b24c6ecbb4f897639ce12b6</string>
     <string name="check_connection">Check your internet connection!</string>
     <string name="logout">Logout</string>
+    <string name="sign_in_google_account">Sign in with your Google account to interact with your events</string>
 </resources>

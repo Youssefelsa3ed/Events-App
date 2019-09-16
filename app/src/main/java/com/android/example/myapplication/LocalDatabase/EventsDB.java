@@ -10,7 +10,7 @@ public class EventsDB {
     @NonNull
     private String id;
     private String location;
-    private String creatorEmail;
+    private String organizerEmail;
     private String eventStartDate;
     private String eventEndDate;
     private String eventStartTime;
@@ -34,23 +34,23 @@ public class EventsDB {
     }
 
     public String getLocation() {
-        return location;
+        return location == null ? "" : location;
     }
 
     public void setLocation(String location) {
         this.location = location;
     }
 
-    public String getCreatorEmail() {
-        return creatorEmail;
+    public String getOrganizerEmail() {
+        return organizerEmail == null ? "" : organizerEmail;
     }
 
-    public void setCreatorEmail(String creatorEmail) {
-        this.creatorEmail = creatorEmail;
+    public void setOrganizerEmail(String organizerEmail) {
+        this.organizerEmail = organizerEmail;
     }
 
     public String getEventStartDate() {
-        return eventStartDate;
+        return eventStartDate == null ? "" : eventStartDate;
     }
 
     public void setEventStartDate(String eventStartDate) {
@@ -58,7 +58,7 @@ public class EventsDB {
     }
 
     public String getEventEndDate() {
-        return eventEndDate;
+        return eventEndDate == null ? "" : eventEndDate;
     }
 
     public void setEventEndDate(String eventEndDate) {
@@ -98,7 +98,7 @@ public class EventsDB {
     }
 
     public String getWeatherIcon() {
-        return weatherIcon;
+        return weatherIcon == null ? "" : weatherIcon;
     }
 
     public void setWeatherIcon(String weatherIcon) {
@@ -114,7 +114,7 @@ public class EventsDB {
     }
 
     public String getStatus() {
-        return status;
+        return status == null ? "" : status;
     }
 
     public void setStatus(String status) {
@@ -122,7 +122,7 @@ public class EventsDB {
     }
 
     public String getSummary() {
-        return summary;
+        return summary == null ? "" : summary;
     }
 
     public void setSummary(String summary) {
@@ -130,7 +130,7 @@ public class EventsDB {
     }
 
     public String getEventStartTime() {
-        return eventStartTime;
+        return eventStartTime == null ? "" : eventStartTime;
     }
 
     public void setEventStartTime(String eventStartTime) {
@@ -138,17 +138,17 @@ public class EventsDB {
     }
 
     public String getEventEndTime() {
-        return eventEndTime;
+        return eventEndTime == null ? "" : eventEndTime;
     }
 
     public void setEventEndTime(String eventEndTime) {
         this.eventEndTime = eventEndTime;
     }
 
-    public EventsDB(@NonNull String id, String location, String creatorEmail, String eventStartDate, String eventEndDate, double temperatureMax, double temperatureMin, double windSpeed, int humidity, String weatherIcon, String description, String status, String summary, String eventStartTime, String eventEndTime) {
+    public EventsDB(@NonNull String id, String location, String organizerEmail, String eventStartDate, String eventEndDate, double temperatureMax, double temperatureMin, double windSpeed, int humidity, String weatherIcon, String description, String status, String summary, String eventStartTime, String eventEndTime) {
         this.id = id;
         this.location = location;
-        this.creatorEmail = creatorEmail;
+        this.organizerEmail = organizerEmail;
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
         this.temperatureMax = temperatureMax;

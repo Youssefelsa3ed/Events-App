@@ -3,6 +3,7 @@ package com.android.example.myapplication.UI.Login;
 import android.content.Intent;
 import android.util.Log;
 
+import com.android.example.myapplication.Models.UserModel.UserData;
 import com.android.example.myapplication.UI.EventsList.EventListActivity;
 import com.android.example.myapplication.Utilities.SharedPrefManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -43,6 +44,7 @@ public class LoginPresenter implements LoginViewPresenter{
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             if (account != null) {
                 SharedPrefManager.getInstance(context).setLoginStatus(true);
+                SharedPrefManager.getInstance(context).setUserData(new UserData(account.getEmail(), account.getDisplayName(), String.valueOf(account.getPhotoUrl())));
                 context.startActivity(new Intent(context, EventListActivity.class));
                 context.finish();
             }

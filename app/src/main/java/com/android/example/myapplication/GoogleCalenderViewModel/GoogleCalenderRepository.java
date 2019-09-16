@@ -32,8 +32,6 @@ class GoogleCalenderRepository {
 
     }
 
-
-
     private static class UpdateEventLocal extends AsyncTask<Void, Void, Void> {
         private EventsDB event;
         private EventsDAO eventsDAO;
@@ -67,23 +65,6 @@ class GoogleCalenderRepository {
         }
     }
 
-
-    private static class DeleteEventLocal extends AsyncTask<Void, Void, Void> {
-        private EventsDAO eventsDAO;
-        private String id;
-
-        DeleteEventLocal(EventsDAO eventsDAO, String id) {
-            this.id = id;
-            this.eventsDAO = eventsDAO;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            eventsDAO.deleteEvent(id);
-            return null;
-        }
-    }
-
     private void getEvents() {
         account = GoogleSignIn.getLastSignedInAccount(context);
         if (account != null)
@@ -103,10 +84,7 @@ class GoogleCalenderRepository {
     void updateEvent(EventsDB event) {
         if (account != null)
             new EventsListPresenter.UpdateAnEvent(event).execute();
-        if(event.getStatus().equals("declined"))
-            new DeleteEventLocal(eventsDAO, event.getId()).execute();
-        else
-            new UpdateEventLocal(eventsDAO, event).execute();
+        new UpdateEventLocal(eventsDAO, event).execute();
     }
 
     EventsDB getEvent(String id) {

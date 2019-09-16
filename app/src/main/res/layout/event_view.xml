@@ -3,99 +3,150 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="160dp"
+    android:layout_height="wrap_content"
     android:layout_margin="10dp"
     app:cardCornerRadius="10dp"
     app:cardElevation="3dp">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/txtLocation"
-            android:drawablePadding="5dp"
-            android:layout_margin="10dp"
-            android:layout_toStartOf="@id/weatherLayout"
-            android:layout_alignParentStart="true"
-            android:textColor="@android:color/black"
-            android:drawableStart="@drawable/ic_location"/>
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/txtLocation"
-            android:layout_marginTop="5dp"
-            android:layout_marginStart="10dp"
-            android:textColor="@android:color/black"
-            android:id="@+id/txtEventDate"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/txtEventDate"
-            android:layout_marginTop="5dp"
-            android:layout_marginStart="10dp"
-            android:textColor="@android:color/black"
-            android:id="@+id/txtStatus"/>
+            android:id="@+id/eventDataLayout">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtSummary"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:layout_margin="10dp"
+                android:layout_toStartOf="@id/weatherLayout"
+                android:layout_alignParentStart="true"
+                android:textColor="@color/colorDarkGray"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtLocation"
+                android:layout_below="@id/txtSummary"
+                android:drawablePadding="5dp"
+                android:layout_marginStart="10dp"
+                android:textSize="12sp"
+                android:layout_toStartOf="@id/weatherLayout"
+                android:layout_alignParentStart="true"
+                android:drawableStart="@drawable/ic_location"/>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="10dp"
-            android:id="@+id/weatherLayout">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtLocation"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:textSize="12sp"
+                android:drawablePadding="5dp"
+                android:drawableStart="@drawable/ic_clock"
+                android:id="@+id/txtEventDate"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtEventDate"
+                android:layout_marginTop="5dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:layout_marginStart="10dp"
+                android:drawablePadding="5dp"
+                android:drawableStart="@drawable/ic_email"
+                android:id="@+id/txtOrganizerEmail"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtOrganizerEmail"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="10dp"
+                android:id="@+id/txtStatus"/>
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorAccent"
+                android:id="@+id/txtEventMonth"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"/>
+            <TextView
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtEventStartDay"
+                android:gravity="center"
+                android:layout_marginEnd="10dp"
+                android:layout_below="@id/txtEventMonth"
+                android:layout_alignParentEnd="true"/>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/txtEventStartDay"
+                android:layout_margin="10dp"
+                android:id="@+id/weatherLayout">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@android:color/black"
+                        android:id="@+id/txtTemperature"
+                        android:drawablePadding="5dp"/>
+                    <com.facebook.drawee.view.SimpleDraweeView
+                        android:id="@+id/ivWeatherIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_vertical"
+                        app:actualImageScaleType="centerCrop"/>
+                </LinearLayout>
+
+
+
+                <TextView
+                    android:id="@+id/txtHumidity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/black"
+                    android:layout_gravity="end"
+                    android:drawableEnd="@drawable/ic_humidity"
+                    android:drawablePadding="5dp" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/txtWindSpeed"
+                    android:drawablePadding="5dp"
+                    android:layout_gravity="end"
                     android:textSize="12sp"
-                    android:layout_gravity="center_vertical"
                     android:textColor="@android:color/black"
-                    android:id="@+id/txtTemperature"
-                    android:drawablePadding="5dp"/>
-                <com.facebook.drawee.view.SimpleDraweeView
-                    android:id="@+id/ivWeatherIcon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center_vertical"
-                    app:actualImageScaleType="centerCrop"/>
+                    android:layout_marginTop="10dp"
+                    android:drawableEnd="@drawable/ic_wind_speed"/>
+
             </LinearLayout>
 
-
-
-            <TextView
-                android:id="@+id/txtHumidity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textSize="12sp"
-                android:textColor="@android:color/black"
-                android:layout_gravity="end"
-                android:drawableEnd="@drawable/ic_humidity"
-                android:drawablePadding="5dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/txtWindSpeed"
-                android:drawablePadding="5dp"
-                android:layout_gravity="end"
-                android:textSize="12sp"
-                android:textColor="@android:color/black"
-                android:layout_marginTop="10dp"
-                android:drawableEnd="@drawable/ic_wind_speed"/>
-
-        </LinearLayout>
-
+        </RelativeLayout>
         <com.google.android.material.chip.ChipGroup
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
+            android:layout_below="@id/eventDataLayout"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
             android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:layout_marginBottom="10dp"
@@ -103,19 +154,26 @@
             <com.google.android.material.chip.Chip
                 style="@style/Widget.MaterialComponents.Chip.Action"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="28dp"
                 android:id="@+id/acceptChip"
                 app:chipIcon="@drawable/ic_accept"
+                app:chipIconTint="@color/colorWhite"
                 android:text="@string/accept"
-                android:textSize="12sp"/>
+                android:textColor="@color/colorWhite"
+                app:iconEndPadding="-8dp"
+                app:chipBackgroundColor="@color/colorPrimary"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
             <com.google.android.material.chip.Chip
                 style="@style/Widget.MaterialComponents.Chip.Action"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="28dp"
                 android:id="@+id/refuseChip"
+                app:chipIconTint="@color/colorAccent"
+                android:textColor="@color/colorAccent"
                 app:chipIcon="@drawable/ic_refuse"
+                app:iconEndPadding="-8dp"
                 android:text="@string/refuse"
-                android:textSize="12sp"/>
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
 
         </com.google.android.material.chip.ChipGroup>
     </RelativeLayout>

@@ -17,6 +17,9 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -39,7 +42,20 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
         @Override
         public boolean areContentsTheSame(EventsDB oldItem, EventsDB newItem) {
             return oldItem.getId().equals(newItem.getId()) &&
-                    oldItem.getStatus().equals(newItem.getStatus());
+                    oldItem.getStatus().equals(newItem.getStatus()) &&
+                    oldItem.getLocation().equals(newItem.getLocation()) &&
+                    oldItem.getWeatherIcon().equals(newItem.getWeatherIcon()) &&
+                    oldItem.getOrganizerEmail().equals(newItem.getOrganizerEmail()) &&
+                    oldItem.getEventStartDate().equals(newItem.getEventStartDate()) &&
+                    oldItem.getEventStartTime().equals(newItem.getEventStartTime()) &&
+                    oldItem.getEventEndDate().equals(newItem.getEventEndDate()) &&
+                    oldItem.getEventEndTime().equals(newItem.getEventEndTime()) &&
+                    oldItem.getDescription().equals(newItem.getDescription()) &&
+                    oldItem.getSummary().equals(newItem.getSummary()) &&
+                    oldItem.getWindSpeed() == newItem.getWindSpeed() &&
+                    oldItem.getHumidity() == newItem.getHumidity() &&
+                    oldItem.getTemperatureMin() == newItem.getTemperatureMin() &&
+                    oldItem.getTemperatureMax() == newItem.getTemperatureMax();
         }
     };
 
@@ -51,14 +67,34 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.txtLocation.setText(getItem(holder.getAdapterPosition()).getLocation());
-        holder.txtStatus.setText(getItem(holder.getAdapterPosition()).getStatus().replace("accepted","Accepted")
-                .replace("tentative", "Pending").replace("needsAction", "Pending"));
+        if(getItem(holder.getAdapterPosition()).getLocation().isEmpty())
+            holder.txtLocation.setVisibility(View.GONE);
+        else
+            holder.txtLocation.setText(getItem(holder.getAdapterPosition()).getLocation());
+        holder.txtStatus.setText(getItem(holder.getAdapterPosition()).getStatus().replace("accepted", "Accepted")
+                .replace("tentative", "Pending").replace("needsAction", "Pending")
+                .replace("declined", "Refused"));
 
-        holder.txtEventDate.setText(String.format("%s : %s",
+        // TODO: 9/16/2019 handle overlapping events
+
+        holder.txtEventDate.setText(String.format("%s @ %s\n%s @ %s",
                 getItem(holder.getAdapterPosition()).getEventStartDate(),
-                getItem(holder.getAdapterPosition()).getEventStartTime().substring(0, 5)));
+                getItem(holder.getAdapterPosition()).getEventStartTime().substring(0, 5),
+                getItem(holder.getAdapterPosition()).getEventEndDate(),
+                getItem(holder.getAdapterPosition()).getEventEndTime().substring(0, 5)));
 
+        SimpleDateFormat format1 = new SimpleDateFormat("EEEE MMM d", Locale.US);
+        SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        holder.txtEventStartDay.setText(getItem(holder.getAdapterPosition()).getEventStartDate().split("-")[2]);
+        try {
+            holder.txtEventMonth.setText(format1.format(format2.parse(getItem(holder.getAdapterPosition()).getEventStartDate())).split(" ")[1]);
+        } catch (ParseException e) {
+            holder.txtEventMonth.setText(getItem(holder.getAdapterPosition()).getEventStartDate().split("-")[1]);
+        }
+
+        holder.txtSummary.setText(getItem(holder.getAdapterPosition()).getSummary());
+
+        holder.txtOrganizerEmail.setText(getItem(holder.getAdapterPosition()).getOrganizerEmail());
         holder.txtHumidity.setText(String.format(Locale.US, "%d", getItem(holder.getAdapterPosition()).getHumidity()));
         holder.txtWindSpeed.setText(String.format(Locale.US, "%.2f", getItem(holder.getAdapterPosition()).getWindSpeed()));
         holder.txtTemperature.setText(String.format(Locale.US, "%.0f - %.0f°C",
@@ -72,18 +108,34 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
             holder.ivWeatherIcon.setImageURI(getItem(holder.getAdapterPosition()).getWeatherIcon());
         }
 
-        if (getItem(holder.getAdapterPosition()).getStatus().equals("tentative") || getItem(holder.getAdapterPosition()).getStatus().equals("needsAction"))
-            holder.chipGroup.setVisibility(View.VISIBLE);
-        else
+        try {
+            if (!getItem(holder.getAdapterPosition()).getStatus().equals("") &&
+                    new Date().compareTo((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                            .parse(String.format("%s %s", getItem(holder.getAdapterPosition()).getEventStartDate(),
+                                    getItem(holder.getAdapterPosition()).getEventStartTime())))) <= 0)
+                holder.chipGroup.setVisibility(View.VISIBLE);
+            else
+                holder.chipGroup.setVisibility(View.GONE);
+        } catch (ParseException e) {
+            e.printStackTrace();
             holder.chipGroup.setVisibility(View.GONE);
+        }
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.txtSummary)
+        TextView txtSummary;
+        @BindView(R.id.txtEventMonth)
+        TextView txtEventMonth;
+        @BindView(R.id.txtEventStartDay)
+        TextView txtEventStartDay;
         @BindView(R.id.txtLocation)
         TextView txtLocation;
         @BindView(R.id.txtEventDate)
         TextView txtEventDate;
+        @BindView(R.id.txtOrganizerEmail)
+        TextView txtOrganizerEmail;
         @BindView(R.id.txtStatus)
         TextView txtStatus;
         @BindView(R.id.ivWeatherIcon)
