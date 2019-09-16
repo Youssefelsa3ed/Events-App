@@ -19,4 +19,8 @@
     <string name="check_connection">Check your internet connection!</string>
     <string name="logout">Logout</string>
     <string name="sign_in_google_account">Sign in with your Google account to interact with your events</string>
+    <string name="ask_for_reschedule">Asking for reschedule.</string>
+    <string name="free_at_time">Would you like to reschedule to</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

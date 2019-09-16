@@ -1,13 +1,20 @@
 package com.android.example.myapplication.UI.EventsList;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -45,6 +52,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -178,6 +186,102 @@ public class EventsListPresenter implements EventsListViewPresenter {
                 context.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
+
+        eventsAdapter.setOnWarningClickListener(position -> {
+            List<EventsDB> eventsDBS = calenderViewModel.getAllEvents().getValue();
+            if (eventsDBS != null) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                long currentDuration = getDifference(eventsDBS.get(position).getEventEndDate() + " " + eventsDBS.get(position).getEventEndTime()
+                        ,eventsDBS.get(position).getEventStartDate() + " " + eventsDBS.get(position).getEventStartTime());
+                for(int i = 1; i < eventsDBS.size(); i++) {
+                    if (i == position)
+                        continue;
+
+                    long difference = getDifference(eventsDBS.get(i).getEventStartDate() + " " + eventsDBS.get(i).getEventStartTime()
+                            , eventsDBS.get(i - 1).getEventEndDate() + " " + eventsDBS.get(i - 1).getEventEndTime());
+                    try {
+                        if (difference > 0 && currentDuration >= difference && (new Date().compareTo((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                                .parse(String.format("%s %s", eventsDBS.get(i - 1).getEventStartDate(),
+                                        eventsDBS.get(i - 1).getEventStartTime())))) <= 0)) {
+
+                            long suggestion = format.parse(eventsDBS.get(i - 1).getEventEndDate() + " " + eventsDBS.get(i - 1).getEventEndTime()).getTime();
+                            askForReschedule(new SimpleDateFormat("EEE, MMM d HH:mm:ss", Locale.US).format(new Date(suggestion))
+                                    , eventsDBS.get(position).getOrganizerEmail()
+                                    , eventsDBS.get(position).getSummary());
+                            return;
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+                try {
+                    long suggestion = format.parse(eventsDBS.get(eventsDBS.size() - 1).getEventEndDate() + " " + eventsDBS.get(eventsDBS.size() - 1).getEventEndTime()).getTime();
+                    askForReschedule(new SimpleDateFormat("EEE, MMM d HH:mm:ss", Locale.US).format(new Date(suggestion))
+                            , eventsDBS.get(position).getOrganizerEmail()
+                            , eventsDBS.get(position).getSummary());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
+    }
+
+    @Override
+    public void askForReschedule(String suggestion, String organizerEmail, String title) {
+        Dialog rescheduleDialog = new Dialog(context);
+        rescheduleDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        rescheduleDialog.setContentView(R.layout.reschedule_dialog);
+        Objects.requireNonNull(rescheduleDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+        Objects.requireNonNull(rescheduleDialog.getWindow()).setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT);
+        rescheduleDialog.setCancelable(false);
+        Button btnClose = rescheduleDialog.findViewById(R.id.btnClose);
+        Button btnAccept = rescheduleDialog.findViewById(R.id.btnAccept);
+        TextView txtSuggestion = rescheduleDialog.findViewById(R.id.txtSuggestionTime);
+        txtSuggestion.setText(String.format("%s %s?", context.getResources().getString(R.string.free_at_time), suggestion));
+        btnClose.setOnClickListener(v-> {
+            rescheduleDialog.cancel();
+            sendEmail("", organizerEmail, title);
+        });
+        btnAccept.setOnClickListener(v-> {
+            rescheduleDialog.cancel();
+            sendEmail(suggestion, organizerEmail, title);
+        });
+        rescheduleDialog.show();
+    }
+
+    @Override
+    public void sendEmail(String suggestion, String organizerEmail, String title) {
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.setType("message/rfc822");
+        emailIntent.putExtra(Intent.EXTRA_EMAIL  , new String[]{organizerEmail});
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Rescheduling " + title);
+        if(suggestion.isEmpty())
+            emailIntent.putExtra(Intent.EXTRA_TEXT   , "Can we reschedule the meeting to another time?");
+        else
+            emailIntent.putExtra(Intent.EXTRA_TEXT   , "Can we reschedule the meeting to " + suggestion + "?");
+        try {
+            context.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(context, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public long getDifference(String second, String first){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US);
+        try {
+            Date firstDate = format.parse(first);
+            Date secondDate = format.parse(second);
+            return secondDate.getTime() - firstDate.getTime();
+        }
+        catch (ParseException e){
+            return 0L;
+        }
+
     }
 
     @Override

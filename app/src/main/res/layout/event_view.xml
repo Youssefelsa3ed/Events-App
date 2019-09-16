@@ -176,5 +176,14 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
 
         </com.google.android.material.chip.ChipGroup>
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="8dp"
+            android:layout_below="@id/eventDataLayout"
+            app:lottie_rawRes="@raw/warning"
+            android:id="@+id/animationView"
+            app:lottie_loop="true"/>
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

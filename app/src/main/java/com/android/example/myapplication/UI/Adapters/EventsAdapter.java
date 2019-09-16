@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.android.example.myapplication.LocalDatabase.EventsDB;
 import com.android.example.myapplication.R;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -28,6 +29,7 @@ import butterknife.ButterKnife;
 public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolder> {
     private setOnChipClickListener chipListener;
     private setOnItemClickListener itemListener;
+    private setOnWarningClickListener warningListener;
 
     public EventsAdapter() {
         super(DIFF_CALLBACK);
@@ -120,6 +122,31 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
             e.printStackTrace();
             holder.chipGroup.setVisibility(View.GONE);
         }
+
+        if(position > 0 && checkIsBetween(getItem(holder.getAdapterPosition() - 1).getEventStartDate() + " " + getItem(holder.getAdapterPosition() - 1).getEventStartTime()
+                , getItem(holder.getAdapterPosition() - 1).getEventEndDate() + " " + getItem(holder.getAdapterPosition() - 1).getEventEndTime()
+                , getItem(holder.getAdapterPosition()).getEventStartDate() + " " + getItem(holder.getAdapterPosition()).getEventStartTime()
+                , getItem(holder.getAdapterPosition()).getEventEndDate() + " " + getItem(holder.getAdapterPosition()).getEventEndTime())){
+            holder.chipGroup.setVisibility(View.GONE);
+            holder.animationView.setVisibility(View.VISIBLE);
+            holder.animationView.playAnimation();
+        }
+        else
+            holder.animationView.setVisibility(View.GONE);
+    }
+
+    private boolean checkIsBetween(String secondEventStart, String secondEventEnd, String currentEventStart, String currentEventEnd){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.US);
+        try {
+        Date secondEventStartDate = format.parse(secondEventStart),
+                secondEventEndDate = format.parse(secondEventEnd),
+                currentStartDate = format.parse(currentEventStart),
+                currentEndDate = format.parse(currentEventEnd);
+            return currentEndDate.getTime() >= secondEventStartDate.getTime() && currentStartDate.getTime() <= secondEventEndDate.getTime();
+        }
+        catch (ParseException e){
+            return false;
+        }
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -154,6 +181,8 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
         Chip refuseChip;
         @BindView(R.id.chipGroup)
         ChipGroup chipGroup;
+        @BindView(R.id.animationView)
+        LottieAnimationView animationView;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -169,6 +198,13 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
                 int position = getAdapterPosition();
                 if (chipListener != null && position != RecyclerView.NO_POSITION) {
                     chipListener.onItemClick(getItem(position), position, "declined");
+                }
+            });
+
+            animationView.setOnClickListener(v-> {
+                int position = getAdapterPosition();
+                if (warningListener != null && position != RecyclerView.NO_POSITION) {
+                    warningListener.onItemClick(position);
                 }
             });
             itemView.setOnClickListener(v -> {
@@ -194,5 +230,14 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
 
     public void setOnItemClickListener(setOnItemClickListener listener) {
         this.itemListener = listener;
+    }
+
+
+    public interface setOnWarningClickListener {
+        void onItemClick(int position);
+    }
+
+    public void setOnWarningClickListener(setOnWarningClickListener listener) {
+        this.warningListener = listener;
     }
 }

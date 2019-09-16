@@ -51,9 +51,8 @@ public class CurrentLocation implements  android.location.LocationListener {
             }
             Location l = mLocationManager.getLastKnownLocation(provider);
 
-            if (l == null) {
+            if (l == null)
                 continue;
-            }
             if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
                 bestLocation = l;
             }

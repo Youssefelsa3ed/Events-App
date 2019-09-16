@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.CountDownTimer;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -42,11 +43,14 @@ public class SplashPresenter implements SplashViewPresenter {
 
     private SplashActivity context ;
     private CurrentLocation currentLocation;
-    boolean checkedPermission;
+    private boolean checkedPermission;
+    static final int GPS_ENABLED = 5;
+    private LocationManager mLocationManager;
     private Dialog noGpsDialog;
     private Location location;
     SplashPresenter(SplashActivity context) {
         this.context = context;
+        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         checkedPermission = false;
         currentLocation = new CurrentLocation(context);
         String currentDay = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
@@ -63,14 +67,6 @@ public class SplashPresenter implements SplashViewPresenter {
 
     @Override
     public void checkPermissions() {
-        LocationManager mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context
-                , Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, CurrentLocation.LOCATION_PERMISSION);
-            return ;
-        }
         if (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             if(noGpsDialog == null) {
                 buildAlertMessageNoGps();
@@ -78,32 +74,44 @@ public class SplashPresenter implements SplashViewPresenter {
             return;
         }
 
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context
+                , Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, CurrentLocation.LOCATION_PERMISSION);
+            return ;
+        }
+
         location = currentLocation.getCurrentLocation();
 
-        context.animationView.playAnimation();
-        new CountDownTimer(3000, 1000) {
+        if(!context.animationView.isAnimating()) {
+            context.animationView.playAnimation();
+            new CountDownTimer(3000, 1000) {
 
-            public void onTick(long millisUntilFinished) {
-                if(currentLocation.getCurrentLocation() != null) {
-                    location = currentLocation.getCurrentLocation();
-                    getWeatherData();
-                    this.cancel();
+                public void onTick(long millisUntilFinished) {
+                    if (location != null) {
+                        if (!checkedPermission) {
+                            getWeatherData();
+                            this.cancel();
+                        }
+                    }
+                    else
+                        location = currentLocation.getCurrentLocation();
                 }
-            }
 
-            public void onFinish() {
-                if(currentLocation.getCurrentLocation() != null) {
-                    location = currentLocation.getCurrentLocation();
-                    getWeatherData();
+                public void onFinish() {
+                    if(location != null)
+                        getWeatherData();
+                    else
+                        checkPermissions();
+
                 }
-                else
-                    checkPermissions();
-            }
-        }.start();
+            }.start();
+        }
 
     }
 
     private void buildAlertMessageNoGps() {
+        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         noGpsDialog = new Dialog(context);
         noGpsDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         noGpsDialog.setContentView(R.layout.no_gps_dialog);
@@ -118,14 +126,14 @@ public class SplashPresenter implements SplashViewPresenter {
         });
         btnOpen.setOnClickListener(v-> {
             noGpsDialog.cancel();
-            checkedPermission = true;
-            context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            context.startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), GPS_ENABLED);
         });
         noGpsDialog.show();
     }
 
     @Override
     public void getWeatherData() {
+        checkedPermission = true;
         ApiUtils.getWeatherService().getWeatherForecast(location.getLatitude(),location.getLongitude(), "metric", context.getResources().getString(R.string.weath_api_key)).enqueue(new Callback<WeatherForecast>() {
             @Override
             public void onResponse(@NonNull Call<WeatherForecast> call, @NonNull Response<WeatherForecast> response) {
