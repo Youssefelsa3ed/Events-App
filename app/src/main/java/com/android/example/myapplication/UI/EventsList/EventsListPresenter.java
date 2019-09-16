@@ -358,8 +358,8 @@ public class EventsListPresenter implements EventsListViewPresenter {
                     }
                 String startDate = e.getStart().getDate() == null ? e.getStart().getDateTime().toString().split("T")[0] : e.getStart().getDate().toString();
                 String endDate = e.getEnd().getDate() == null ? e.getEnd().getDateTime().toString().split("T")[0] : e.getEnd().getDate().toString();
-                String startTime = e.getStart().getDateTime() == null ? "" : e.getStart().getDateTime().toString().split("T")[1];
-                String endTime = e.getEnd().getDateTime() == null ? "" : e.getEnd().getDateTime().toString().split("T")[1];
+                String startTime = e.getStart().getDateTime() == null ? "00:00:00+02:00" : e.getStart().getDateTime().toString().split("T")[1];
+                String endTime = e.getEnd().getDateTime() == null ? "00:00:00+02:00" : e.getEnd().getDateTime().toString().split("T")[1];
                 LocalWeatherData weatherData = SharedPrefManager.getInstance(context).getWeatherData(startDate);
                 if (weatherData != null)
                     eventsDBList.add(new EventsDB(e.getId(), e.getLocation(), e.getOrganizer().getEmail(), startDate, endDate, weatherData.getTempMax(), weatherData.getTempMin(), weatherData.getWindSpeed(), weatherData.getHumidity(), weatherData.getWeatherIcon(), e.getDescription(), status, e.getSummary() == null ? "No title" : e.getSummary(), startTime, endTime));

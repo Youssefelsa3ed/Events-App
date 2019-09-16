@@ -162,6 +162,7 @@ public class SplashPresenter implements SplashViewPresenter {
         double tempMax = 100;
         int count = 0, humidity = 0;
         double windSpeed = 0;
+        String weatherIcon = "";
         for (int i = 0; i < list.size(); i++) {
             ListItem item = list.get(i);
             if(item.getDtTxt().split(" ")[0].equals(date)) {
@@ -169,19 +170,21 @@ public class SplashPresenter implements SplashViewPresenter {
                 if(tempMin > item.getMain().getTempMin())
                     tempMin = item.getMain().getTempMin();
 
-                if(tempMax < item.getMain().getTempMax())
+                if(tempMax < item.getMain().getTempMax()) {
                     tempMax = item.getMain().getTempMax();
+                    weatherIcon = "https://openweathermap.org/img/wn/"+ item.getWeather().get(0).getIcon()+".png";
+                }
             }
             else {
-                count = 0;
+                count = 1;
                 windSpeed = 0;
                 humidity = 0;
+                weatherIcon = "https://openweathermap.org/img/wn/"+ item.getWeather().get(0).getIcon()+".png";
                 tempMin = item.getMain().getTempMin();
                 tempMax = item.getMain().getTempMax();
             }
 
             date = item.getDtTxt().split(" ")[0];
-            String weatherIcon = "https://openweathermap.org/img/wn/"+ item.getWeather().get(0).getIcon()+".png";
             windSpeed += item.getWind().getSpeed();
             humidity += item.getMain().getHumidity();
             SharedPrefManager.getInstance(context).saveWeatherData(new LocalWeatherData(date, weatherIcon, tempMin, tempMax, windSpeed, humidity, count), date);
