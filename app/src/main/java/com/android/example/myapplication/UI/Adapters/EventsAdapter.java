@@ -142,7 +142,7 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
                 secondEventEndDate = format.parse(secondEventEnd),
                 currentStartDate = format.parse(currentEventStart),
                 currentEndDate = format.parse(currentEventEnd);
-            return currentEndDate.getTime() >= secondEventStartDate.getTime() && currentStartDate.getTime() <= secondEventEndDate.getTime();
+            return currentEndDate.getTime() >= secondEventStartDate.getTime() && currentStartDate.getTime() < secondEventEndDate.getTime();
         }
         catch (ParseException e){
             return false;
