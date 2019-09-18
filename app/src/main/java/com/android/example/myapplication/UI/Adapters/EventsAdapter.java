@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.airbnb.lottie.LottieAnimationView;
 import com.android.example.myapplication.LocalDatabase.EventsDB;
 import com.android.example.myapplication.R;
+import com.android.example.myapplication.UI.EventsList.EventsListPresenter;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -69,21 +70,29 @@ public class EventsAdapter extends ListAdapter<EventsDB, EventsAdapter.ViewHolde
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if(getItem(holder.getAdapterPosition()).getLocation().isEmpty())
-            holder.txtLocation.setVisibility(View.GONE);
-        else
-            holder.txtLocation.setText(getItem(holder.getAdapterPosition()).getLocation());
+        holder.txtLocation.setText(getItem(holder.getAdapterPosition()).getLocation());
         holder.txtStatus.setText(getItem(holder.getAdapterPosition()).getStatus().replace("accepted", "Accepted")
                 .replace("tentative", "Pending").replace("needsAction", "Pending")
                 .replace("declined", "Refused"));
 
-        // TODO: 9/16/2019 handle overlapping events
-
-        holder.txtEventDate.setText(String.format("%s @ %s\n%s @ %s",
-                getItem(holder.getAdapterPosition()).getEventStartDate(),
-                getItem(holder.getAdapterPosition()).getEventStartTime().substring(0, 5),
-                getItem(holder.getAdapterPosition()).getEventEndDate(),
-                getItem(holder.getAdapterPosition()).getEventEndTime().substring(0, 5)));
+        if(EventsListPresenter.mTwoPane){
+            holder.txtEventDate.setText(String.format("%s\n%s",
+                    getItem(holder.getAdapterPosition()).getEventStartDate(),
+                    getItem(holder.getAdapterPosition()).getEventEndDate()));
+            holder.txtOrganizerEmail.setVisibility(View.GONE);
+            holder.txtLocation.setVisibility(View.GONE);
+        }
+        else {
+            holder.txtEventDate.setText(String.format("%s @ %s\n%s @ %s",
+                    getItem(holder.getAdapterPosition()).getEventStartDate(),
+                    getItem(holder.getAdapterPosition()).getEventStartTime().substring(0, 5),
+                    getItem(holder.getAdapterPosition()).getEventEndDate(),
+                    getItem(holder.getAdapterPosition()).getEventEndTime().substring(0, 5)));
+            if(getItem(holder.getAdapterPosition()).getLocation().isEmpty())
+                holder.txtLocation.setVisibility(View.GONE);
+            else
+                holder.txtLocation.setVisibility(View.VISIBLE);
+        }
 
         SimpleDateFormat format1 = new SimpleDateFormat("EEEE MMM d", Locale.US);
         SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd", Locale.US);

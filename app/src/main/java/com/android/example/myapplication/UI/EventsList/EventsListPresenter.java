@@ -73,7 +73,7 @@ public class EventsListPresenter implements EventsListViewPresenter {
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
-    private boolean mTwoPane;
+    public static boolean mTwoPane;
     private static GoogleCalenderViewModel calenderViewModel;
     private static EventsAdapter eventsAdapter;
 
